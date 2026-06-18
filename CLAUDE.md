@@ -4,6 +4,23 @@ Read this file at the start of every session before doing anything.
 
 ---
 
+## Session Handoff Protocol (any LLM)
+
+If you are starting a new session — whether you are Claude, Gemini, GPT, or any
+other model — do the following before writing any code:
+
+1. Read this file (`CLAUDE.md`) in full.
+2. Read `docs/project-status.md` — find the current step and open questions.
+3. Read `docs/decision-log.md` — understand why things are the way they are.
+4. Run `git log --oneline -10` — confirm what is actually committed.
+5. Tell Umar: "I am on step N. Last completed: X. Next: Y." and wait for his go-ahead.
+
+**Do not infer state from code alone.** Docs + git log is the source of truth.
+**Do not reverse decisions in the decision log** without flagging to Umar first.
+**Do not skip the governance checklist** (update status → write code → update docs → commit → tag).
+
+---
+
 ## Project Identity
 
 - **Repo:** acoustic-localization-twin (local: traffic_intersection/)
