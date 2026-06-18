@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+shared/current_state.json
+shared/current_state.tmp
+.env
+*.log
+media/*.mp4
