@@ -10,4 +10,5 @@ shared/current_state.json
 shared/current_state.tmp
 .env
 *.log
+.vscode/
 media/*.mp4
