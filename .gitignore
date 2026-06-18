@@ -12,3 +12,5 @@ shared/current_state.tmp
 *.log
 .vscode/
 media/*.mp4
+.ipynb_checkpoints/
+.claude/settings.local.json

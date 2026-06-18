@@ -24,7 +24,7 @@ Core algorithm: TDOA-based localization using Gauss-Newton iterative solver.
 | 1 | Project scaffold + TDOA algorithm smoke test | DONE | 2026-06-18 |
 | 2 | Scenario YAML loader + wildlife config | DONE | 2026-06-18 |
 | 3 | Confidence ellipse validation + unit tests | DONE | 2026-06-18 |
-| 4 | PyVista 3D render — single frame | pending | — |
+| 4 | PyVista 3D render — single frame | DONE | 2026-06-18 |
 | 5 | Source motion + live render loop | pending | — |
 | 6 | Streamlit dashboard alongside | pending | — |
 | 7 | Full demo launch script | pending | — |
@@ -66,6 +66,24 @@ the critical parameter to characterize in the real sensor deployment.
 | 2 | What is the target deployment area size (affects sensor placement design)? | Umar | High |
 | 3 | Will terrain be flat or hilly? (affects Phase 1.5 scope) | Umar | Medium |
 | 4 | Is 4 sensors the target, or more? GDOP improves with more sensors | Umar | Medium |
+
+---
+
+## Step 4 Results (2026-06-18)
+
+**What was built:**
+- `visualization/renderer.py` — PyVista renderer: flat terrain mesh, sensor spheres,
+  true/estimated source spheres, connecting line, 95% confidence ellipse curve, annotations
+- `scripts/render_frame.py` — single-frame demo script with `--screenshot` flag
+
+**Render validated:**
+- Scenario: Forest Clearing — Wildlife Acoustic Monitoring
+- Source at array centre (150, 150): error 3.48 cm, ellipse 5.9 × 5.9 cm (circular — correct, symmetric GDOP at centroid)
+- Window title, annotations, and legend all populated from scenario config
+- `--screenshot` flag saves PNG to `media/` without interactive window
+
+**Key design point:** Renderer imports from `scenarios/` and `shared/` only.
+Engine is never imported by visualization — dependency rule from CLAUDE.md holds.
 
 ---
 

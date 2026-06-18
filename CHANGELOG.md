@@ -5,6 +5,22 @@ Format: `[step-N] YYYY-MM-DD — Description`
 
 ---
 
+## [step-4] 2026-06-18 — PyVista 3D single-frame renderer
+
+### Added
+- `visualization/renderer.py` — PyVista renderer (terrain, sensors, true/est positions, confidence ellipse)
+- `visualization/__init__.py`
+- `scripts/render_frame.py` — single-frame demo with --screenshot flag
+
+### Changed
+- `scenarios/configs/wildlife_monitoring.yaml` — name updated to human-readable display string
+- `visualization/renderer.py` — window title pulled from scenario.name
+
+### Results
+- 3D window renders correctly: 300m terrain, 4 sensors, source at centroid, 3.48cm error, 5.9x5.9cm ellipse
+
+---
+
 ## [step-3] 2026-06-18 — Confidence ellipse validation, unit tests, and concept notebook
 
 ### Added

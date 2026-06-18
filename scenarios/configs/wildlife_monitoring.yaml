@@ -6,7 +6,7 @@
 # Deployment geometry: 4 sensors around a 300m x 300m forest clearing.
 # Source: an animal moving along a path through the clearing.
 
-name: wildlife_monitoring
+name: Forest Clearing — Wildlife Acoustic Monitoring
 description: >
   Passive acoustic monitoring of wildlife movement in a forest clearing.
   Four microphone sensors at clearing perimeter localize animal vocalizations
