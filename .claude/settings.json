@@ -1,0 +1,17 @@
+{
+    "hooks": {
+        "Stop": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "powershell -NoProfile -File scripts\\governance_check.ps1",
+                        "shell": "powershell",
+                        "timeout": 10,
+                        "statusMessage": "Checking governance..."
+                    }
+                ]
+            }
+        ]
+    }
+}
