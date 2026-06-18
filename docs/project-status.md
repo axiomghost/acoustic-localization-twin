@@ -23,7 +23,7 @@ Core algorithm: TDOA-based localization using Gauss-Newton iterative solver.
 |------|-------------|--------|------|
 | 1 | Project scaffold + TDOA algorithm smoke test | DONE | 2026-06-18 |
 | 2 | Scenario YAML loader + wildlife config | DONE | 2026-06-18 |
-| 3 | Confidence ellipse validation + unit tests | pending | — |
+| 3 | Confidence ellipse validation + unit tests | DONE | 2026-06-18 |
 | 4 | PyVista 3D render — single frame | pending | — |
 | 5 | Source motion + live render loop | pending | — |
 | 6 | Streamlit dashboard alongside | pending | — |
@@ -66,6 +66,24 @@ the critical parameter to characterize in the real sensor deployment.
 | 2 | What is the target deployment area size (affects sensor placement design)? | Umar | High |
 | 3 | Will terrain be flat or hilly? (affects Phase 1.5 scope) | Umar | Medium |
 | 4 | Is 4 sensors the target, or more? GDOP improves with more sensors | Umar | Medium |
+
+---
+
+## Step 3 Results (2026-06-18)
+
+**What was built:**
+- `tests/test_propagation.py` — 5 tests covering TOA correctness, symmetry, Pythagorean geometry
+- `tests/test_tdoa.py` — 6 tests covering vector length, zero-noise cases, sign convention, noise statistics, physical bounds
+- `tests/test_localizer.py` — 11 tests covering noiseless recovery, noisy error bounds, covariance PD property, ellipse geometry, noise scaling, GDOP sensitivity, Monte Carlo coverage, and scenario loader integration
+
+**Bug found and fixed:**
+Two algorithm defects caught by tests, both now in decision log (DEC-007):
+1. **TDOA noise correlation ignored** — TDOA measurements share sensor-0 noise, making them correlated. Unweighted LS underestimated position covariance, producing ellipses too small (73% coverage instead of 95%). Fixed: weighted Gauss-Newton with M^{-1} = I - (1/N)*ones.
+2. **Ellipse angle not normalised** — arctan2 returns [-180, 180] but ellipse has 180-degree symmetry. Fixed: normalise to [-90, 90] in confidence.py.
+
+**Final test result:** 22/22 passed, 0.49s
+
+**Key validation:** Monte Carlo coverage test confirms the 95% confidence ellipse contains the true position in 88-99% of trials — statistically correct.
 
 ---
 

@@ -5,6 +5,44 @@ Format: `[step-N] YYYY-MM-DD — Description`
 
 ---
 
+## [step-3] 2026-06-18 — Confidence ellipse validation, unit tests, and concept notebook
+
+### Added
+- `tests/test_propagation.py` — 5 tests
+- `tests/test_tdoa.py` — 6 tests
+- `tests/test_localizer.py` — 11 tests (including Monte Carlo coverage test)
+- `docs/concepts.ipynb` — estimation theory concept notebook (TDOA, Gauss-Newton,
+  noise correlation, weighted LS, FIM/CRLB, confidence ellipse, GDOP)
+
+### Fixed
+- `engine/localizer.py` — weighted GN with M^{-1} = I - (1/N)*ones (DEC-007)
+- `engine/confidence.py` — normalise ellipse angle to [-90, 90]
+
+### Results
+- 22/22 tests pass
+- Monte Carlo coverage validated at 95%
+
+---
+
+## [step-3-pre] 2026-06-18 — Confidence ellipse validation and unit tests
+
+### Added
+- `tests/test_propagation.py` — 5 tests for SimplePropagation
+- `tests/test_tdoa.py` — 6 tests for TDOA measurement generation
+- `tests/test_localizer.py` — 11 tests for localizer, confidence ellipse, and scenario loader
+- `tests/__init__.py`
+
+### Fixed
+- `engine/localizer.py` — upgraded unweighted to weighted Gauss-Newton using correct
+  TDOA noise covariance M^{-1} = I - (1/N)*ones. Coverage improved from 73% to 95%.
+- `engine/confidence.py` — normalise ellipse angle to [-90, 90] (180-degree symmetry)
+
+### Results
+- 22/22 tests pass
+- Monte Carlo coverage: 95% confidence ellipse validated statistically
+
+---
+
 ## [step-2] 2026-06-18 — Scenario YAML loader and wildlife monitoring config
 
 ### Added

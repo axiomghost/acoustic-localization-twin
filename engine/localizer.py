@@ -1,16 +1,24 @@
 """
-TDOA-based source localizer — least-squares hyperbolic intersection.
+TDOA-based source localizer — weighted least-squares hyperbolic intersection.
 
-Algorithm: linearize the hyperbolic equations around an initial guess
-(centroid of sensor array) and solve iteratively via Gauss-Newton.
-This is equivalent to the Fang / Chan-Ho linearization approach but
-implemented directly so the math is transparent.
+Algorithm: Gauss-Newton with the correct TDOA noise covariance (DEC-007).
 
-Each TDOA measurement defines a hyperboloid:
-    ||x - s_i|| - ||x - s_0|| = c * tdoa_i
+Each TDOA measurement is tdoa[i] = toa[i+1] - toa[0].
+Since sensor-0 appears in all differences, the (N-1) TDOA measurements are
+correlated. Their noise covariance in range units is:
 
-We linearize around current estimate x_k, form the Jacobian, and
-update: x_{k+1} = x_k + (J^T J)^{-1} J^T r
+    C = sigma_r^2 * M,   M = I + 1*1^T   (N-1) x (N-1)
+
+where 1 is the all-ones vector. By Sherman-Morrison:
+
+    M^{-1} = I - (1/N) * 1*1^T
+
+The weighted Gauss-Newton update and covariance are:
+
+    delta = (J^T M^{-1} J)^{-1} J^T M^{-1} (-r)
+    cov(x) = sigma_r^2 * (J^T M^{-1} J)^{-1}
+
+We return the raw (J^T M^{-1} J)^{-1} — caller scales by sigma_r^2.
 """
 from __future__ import annotations
 import numpy as np
@@ -21,7 +29,7 @@ class Localizer(Protocol):
     def estimate(
         self, tdoa: np.ndarray, sensor_positions: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray]:
-        """Return (position_estimate [2], covariance [2x2])."""
+        """Return (position_estimate [2], raw_cov [2x2]). Caller scales cov by sigma_r^2."""
         ...
 
 
@@ -40,42 +48,42 @@ class GaussNewtonTDOA:
         self, tdoa: np.ndarray, sensor_positions: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray]:
         """
-        tdoa: shape (N-1,)  — differences relative to sensor 0
+        tdoa: shape (N-1,)  — TDOA differences relative to sensor 0
         sensor_positions: shape (N, 2)
-        Returns (xy_est [2], cov [2x2])
+        Returns (xy_est [2], raw_cov [2x2]) where raw_cov = (J^T M^{-1} J)^{-1}
         """
+        N = len(sensor_positions)
         s0 = sensor_positions[0]
-        sensors = sensor_positions[1:]   # (N-1, 2)
-        d_meas = tdoa * self.c           # measured range differences (metres)
+        sensors = sensor_positions[1:]       # (N-1, 2)
+        d_meas = tdoa * self.c               # measured range differences (metres)
+
+        # M^{-1} = I - (1/N) * ones(N-1, N-1)  via Sherman-Morrison
+        Minv = np.eye(N - 1) - np.ones((N - 1, N - 1)) / N
 
         # Initial guess: centroid of array
         x = sensor_positions.mean(axis=0).copy().astype(float)
 
+        JtMinvJ = np.eye(2)  # initialised; will be set in first iteration
         for _ in range(self.max_iter):
             r0 = np.linalg.norm(x - s0)
             ri = np.linalg.norm(x - sensors, axis=1)   # (N-1,)
 
-            # Residuals: predicted range diff - measured range diff
             residuals = (ri - r0) - d_meas              # (N-1,)
 
-            # Jacobian: d(residuals)/d(x)  shape (N-1, 2)
+            # Jacobian d(residuals)/d(x), shape (N-1, 2)
             J = (x - sensors) / ri[:, None] - (x - s0) / r0
 
-            # Gauss-Newton step
-            JtJ = J.T @ J
-            delta = np.linalg.solve(JtJ, J.T @ (-residuals))
+            JtMinvJ = J.T @ Minv @ J
+            delta = np.linalg.solve(JtMinvJ, J.T @ Minv @ (-residuals))
             x = x + delta
 
             if np.linalg.norm(delta) < self.tol:
                 break
 
-        # Covariance estimate via linearized propagation:
-        # cov(x) ≈ (J^T J)^{-1} * sigma_r^2
-        # where sigma_r = c * noise_std_s (range noise from timing noise)
-        # We return the raw (J^T J)^{-1} — caller scales by sigma_r^2
+        # Raw covariance: (J^T M^{-1} J)^{-1}  — caller multiplies by sigma_r^2
         try:
-            cov = np.linalg.inv(JtJ)
+            raw_cov = np.linalg.inv(JtMinvJ)
         except np.linalg.LinAlgError:
-            cov = np.eye(2) * 1e6
+            raw_cov = np.eye(2) * 1e6
 
-        return x, cov
+        return x, raw_cov

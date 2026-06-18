@@ -63,6 +63,22 @@ geometry (high GDOP) will show larger ellipses, which is correct behavior.
 
 ---
 
+## DEC-007 — Localizer: weighted LS with correct TDOA noise covariance
+**Date:** 2026-06-18
+**Decision:** Replace unweighted Gauss-Newton with weighted GN using the correct
+TDOA noise covariance matrix C = sigma_r^2 * M, M = I + 1*1^T.
+**Rationale:** Each TDOA is toa[i+1] - toa[0], so all measurements share
+sensor-0's noise — they are correlated, not independent. The unweighted solver
+underestimates position covariance by ~2x, producing confidence ellipses that
+are too small (73% coverage instead of 95%). The correct M^{-1} via
+Sherman-Morrison is I - (1/N)*ones, giving the true MLE solution and the
+correct Fisher Information Matrix. Caught and confirmed by the Monte Carlo
+coverage test in Step 3.
+**Consequence:** Ellipse sizes increase slightly (~sqrt(2) on axes) but now
+correctly represent 95% confidence. The fix is validated by the coverage test.
+
+---
+
 ## DEC-006 — Abstract interfaces: TerrainBase, PropagationModel, Localizer
 **Date:** 2026-06-18  
 **Decision:** Define Protocol/ABC for exactly three components: TerrainBase,

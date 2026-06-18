@@ -32,5 +32,10 @@ def confidence_ellipse(cov: np.ndarray, sigma_r: float) -> dict:
     a = np.sqrt(CHI2_95_2DOF * eigenvalues[0])
     b = np.sqrt(CHI2_95_2DOF * eigenvalues[1])
     angle_deg = float(np.degrees(np.arctan2(eigenvectors[1, 0], eigenvectors[0, 0])))
+    # Normalise to [-90, 90]: ellipse has 180-degree symmetry
+    if angle_deg > 90.0:
+        angle_deg -= 180.0
+    elif angle_deg < -90.0:
+        angle_deg += 180.0
 
     return {"a": float(a), "b": float(b), "angle_deg": angle_deg}
