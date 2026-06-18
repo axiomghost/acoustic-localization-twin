@@ -22,7 +22,7 @@ Core algorithm: TDOA-based localization using Gauss-Newton iterative solver.
 | Step | Description | Status | Date |
 |------|-------------|--------|------|
 | 1 | Project scaffold + TDOA algorithm smoke test | DONE | 2026-06-18 |
-| 2 | Scenario YAML loader + wildlife config | pending | — |
+| 2 | Scenario YAML loader + wildlife config | DONE | 2026-06-18 |
 | 3 | Confidence ellipse validation + unit tests | pending | — |
 | 4 | PyVista 3D render — single frame | pending | — |
 | 5 | Source motion + live render loop | pending | — |
@@ -66,6 +66,24 @@ the critical parameter to characterize in the real sensor deployment.
 | 2 | What is the target deployment area size (affects sensor placement design)? | Umar | High |
 | 3 | Will terrain be flat or hilly? (affects Phase 1.5 scope) | Umar | Medium |
 | 4 | Is 4 sensors the target, or more? GDOP improves with more sensors | Umar | Medium |
+
+---
+
+## Step 2 Results (2026-06-18)
+
+**What was built:**
+- `scenarios/loader.py` — Pydantic v2 models for full scenario config (terrain, sensors, source, propagation, sim, visualization). Validated on load with clear error messages.
+- `scenarios/configs/wildlife_monitoring.yaml` — first civilian scenario: 4 sensors around a 300m x 300m forest clearing, animal moving at 1.2 m/s
+- `scripts/run_tdoa_demo.py` — updated to load entirely from YAML; no hardcoded values remain
+
+**Algorithm performance (wildlife scenario):**
+- Array: 4 sensors, 300m x 300m clearing perimeter
+- Timing noise: 0.1 ms
+- Mean localization error: **2.6 cm**, Max: **4.7 cm**
+- Confidence ellipse semi-axes: ~6–7 cm x 2.9–4.0 cm (grows near array edges — correct GDOP behaviour)
+- Engine is now fully scenario-agnostic: swap the YAML, get a different deployment
+
+**Notable:** Ellipse semi-major axis increases toward array edges (ticks 0 and 19) and is smallest near the array centre. This is geometrically correct — GDOP degrades near edges. Worth flagging to Umar as it directly informs real sensor placement decisions.
 
 ---
 

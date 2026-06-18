@@ -5,6 +5,22 @@ Format: `[step-N] YYYY-MM-DD — Description`
 
 ---
 
+## [step-2] 2026-06-18 — Scenario YAML loader and wildlife monitoring config
+
+### Added
+- `scenarios/loader.py` — Pydantic v2 ScenarioConfig models with validation
+- `scenarios/configs/wildlife_monitoring.yaml` — forest clearing wildlife monitoring scenario
+- `scenarios/__init__.py`
+
+### Changed
+- `scripts/run_tdoa_demo.py` — now loads fully from scenario YAML, no hardcoded values
+
+### Results
+- Wildlife scenario (300m array): mean error 2.6 cm, max 4.7 cm at 0.1 ms noise
+- GDOP variation visible across path: ellipse grows near array edges as expected
+
+---
+
 ## [step-1] 2026-06-18 — Project scaffold and TDOA algorithm baseline
 
 ### Added

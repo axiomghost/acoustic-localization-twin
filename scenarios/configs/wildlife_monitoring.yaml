@@ -1,0 +1,61 @@
+# Scenario: Wildlife Acoustic Monitoring
+# Use case: Passive acoustic monitoring of wildlife in a forest clearing.
+# A network of microphone sensors detects and localizes animal sound events
+# (vocalizations, movement) to support ecological surveys without physical intrusion.
+#
+# Deployment geometry: 4 sensors around a 300m x 300m forest clearing.
+# Source: an animal moving along a path through the clearing.
+
+name: wildlife_monitoring
+description: >
+  Passive acoustic monitoring of wildlife movement in a forest clearing.
+  Four microphone sensors at clearing perimeter localize animal vocalizations
+  using TDOA to produce a position estimate and uncertainty ellipse.
+use_case: wildlife_monitoring
+
+terrain:
+  type: flat
+  size_m: 300.0
+
+sensors:
+  - id: 0
+    x: 10.0
+    y: 10.0
+    label: "sensor-NW"
+  - id: 1
+    x: 290.0
+    y: 10.0
+    label: "sensor-NE"
+  - id: 2
+    x: 290.0
+    y: 290.0
+    label: "sensor-SE"
+  - id: 3
+    x: 10.0
+    y: 290.0
+    label: "sensor-SW"
+
+source:
+  # Animal moving diagonally across the clearing
+  path:
+    - x: 60.0
+      y: 80.0
+    - x: 240.0
+      y: 220.0
+  speed_m_per_s: 1.2        # ~walking pace for a large mammal
+  signature: impulsive      # discrete vocalization events
+
+propagation:
+  speed_of_sound_m_per_s: 343.0
+  timing_noise_std_ms: 0.1  # 0.1 ms — achievable with GPS-disciplined sensor clocks
+
+sim:
+  tick_interval_s: 0.5      # one localization attempt every 500ms
+  total_duration_s: 120.0   # 2-minute monitoring window
+
+visualization:
+  sensor_color: "blue"
+  true_path_color: "green"
+  estimate_color: "red"
+  ellipse_color: "orange"
+  terrain_color: "lightgray"
