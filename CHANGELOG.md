@@ -5,6 +5,24 @@ Format: `[step-N] YYYY-MM-DD — Description`
 
 ---
 
+## [step-6] 2026-06-19 — Rich terminal panel
+
+### Added
+- `dashboard/panel.py` — Live terminal dashboard: scenario header, localization metrics,
+  40-tick error sparkline, per-sensor SNR table with colour-coded bars (green/yellow/red)
+- `dashboard/__init__.py`
+- `scripts/run_panel.py` — entry point; run in a second terminal alongside run_live.py
+
+### Changed
+- `docs/project-status.md` / `CLAUDE.md` — Streamlit replaced with Rich terminal panel
+  throughout plan and docs
+
+### Results
+- Panel renders live at 4 Hz polling shared/current_state.json
+- Sparkline, metrics, and sensor table all update in sync with the 3D render window
+
+---
+
 ## [step-5] 2026-06-19 — Source motion and live render loop
 
 ### Added

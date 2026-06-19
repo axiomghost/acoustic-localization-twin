@@ -117,7 +117,7 @@ Always tell Umar which `[YOU]` tasks to do before asking Claude to continue.
 | 3 | Confidence ellipse validation + unit tests | pending |
 | 4 | PyVista 3D render — single frame | pending |
 | 5 | Source motion + live render loop | pending |
-| 6 | Streamlit dashboard alongside | pending |
+| 6 | Rich terminal panel — live stats alongside 3D render | pending |
 | 7 | Full demo launch script + functional report | pending |
 | 8 | Screencap + publish to GitHub | pending |
 | 9–11 | Impulsive event localization (crack+blast fusion) | PRIVATE REPO ONLY — do not implement here |
