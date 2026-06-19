@@ -45,25 +45,45 @@ class GaussNewtonTDOA:
         self.tol = tol
 
     def estimate(
-        self, tdoa: np.ndarray, sensor_positions: np.ndarray
+        self,
+        tdoa: np.ndarray,
+        sensor_positions: np.ndarray,
+        sensor_var: np.ndarray | None = None,
     ) -> tuple[np.ndarray, np.ndarray]:
         """
         tdoa: shape (N-1,)  — TDOA differences relative to sensor 0
         sensor_positions: shape (N, 2)
-        Returns (xy_est [2], raw_cov [2x2]) where raw_cov = (J^T M^{-1} J)^{-1}
+        sensor_var: optional per-sensor arrival-time noise variance (s^2), length N.
+
+        The weighting matrix W is the inverse of the TDOA measurement covariance —
+        this is the maximum-ratio / soft-decision step (give noisy sensors less say):
+
+          - sensor_var is None  (equal variance): W = M^{-1} = I - (1/N)*ones.
+            Returns raw_cov = (J^T W J)^{-1}, DIMENSIONLESS. Caller scales by sigma_r^2.
+
+          - sensor_var given (heterogeneous): the TDOA covariance in range units is
+            C_r = c^2 * (diag(var[1:]) + var[0]*ones), so W = C_r^{-1}.
+            Returns pos_cov = (J^T W J)^{-1}, already in m^2 (do NOT scale again).
         """
         N = len(sensor_positions)
         s0 = sensor_positions[0]
         sensors = sensor_positions[1:]       # (N-1, 2)
         d_meas = tdoa * self.c               # measured range differences (metres)
 
-        # M^{-1} = I - (1/N) * ones(N-1, N-1)  via Sherman-Morrison
-        Minv = np.eye(N - 1) - np.ones((N - 1, N - 1)) / N
+        if sensor_var is None:
+            # Equal-variance case: W = M^{-1} via Sherman-Morrison (dimensionless).
+            W = np.eye(N - 1) - np.ones((N - 1, N - 1)) / N
+        else:
+            # Heterogeneous case: build the true TDOA covariance and invert it.
+            var = np.asarray(sensor_var, dtype=float)
+            cov_tau = np.diag(var[1:]) + var[0] * np.ones((N - 1, N - 1))  # s^2
+            cov_r = (self.c ** 2) * cov_tau                                # m^2
+            W = np.linalg.inv(cov_r)
 
         # Initial guess: centroid of array
         x = sensor_positions.mean(axis=0).copy().astype(float)
 
-        JtMinvJ = np.eye(2)  # initialised; will be set in first iteration
+        JtWJ = np.eye(2)  # initialised; will be set in first iteration
         for _ in range(self.max_iter):
             r0 = np.linalg.norm(x - s0)
             ri = np.linalg.norm(x - sensors, axis=1)   # (N-1,)
@@ -73,17 +93,18 @@ class GaussNewtonTDOA:
             # Jacobian d(residuals)/d(x), shape (N-1, 2)
             J = (x - sensors) / ri[:, None] - (x - s0) / r0
 
-            JtMinvJ = J.T @ Minv @ J
-            delta = np.linalg.solve(JtMinvJ, J.T @ Minv @ (-residuals))
+            JtWJ = J.T @ W @ J
+            delta = np.linalg.solve(JtWJ, J.T @ W @ (-residuals))
             x = x + delta
 
             if np.linalg.norm(delta) < self.tol:
                 break
 
-        # Raw covariance: (J^T M^{-1} J)^{-1}  — caller multiplies by sigma_r^2
+        # Covariance: (J^T W J)^{-1}. Dimensionless if sensor_var is None
+        # (caller scales by sigma_r^2); already m^2 if sensor_var was given.
         try:
-            raw_cov = np.linalg.inv(JtMinvJ)
+            cov = np.linalg.inv(JtWJ)
         except np.linalg.LinAlgError:
-            raw_cov = np.eye(2) * 1e6
+            cov = np.eye(2) * 1e6
 
-        return x, raw_cov
+        return x, cov

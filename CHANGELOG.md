@@ -5,6 +5,35 @@ Format: `[step-N] YYYY-MM-DD — Description`
 
 ---
 
+## [A2] 2026-06-19 — Maximum-ratio (inverse-variance) weighting
+
+First step of the Phase 1.5 estimation-theory track (learning + product together).
+
+### Added
+- `engine/tdoa.py` — `timing_std_from_range` and `snr_db_from_range`: per-sensor noise
+  from geometry (farther sensor -> noisier arrival time); `compute_tdoa_measurements`
+  now accepts scalar or per-sensor noise std (DEC-009)
+- `engine/localizer.py` — generalized weighted GN from equal-variance (`M^{-1}`) to true
+  inverse measurement covariance (`C_r^{-1}`); optional `sensor_var` arg; returns
+  position covariance in m^2 when variances supplied (DEC-010)
+- `tests/test_localizer.py` — 3 tests: reduces-to-equal-variance, MRC beats equal-weight
+  under heterogeneous noise, weighted 95% coverage
+- `docs/concepts.ipynb` — section 8: weighted estimation as Maximum-Ratio Combining,
+  taught via the diversity-receiver anchor with a "break it" degraded-sensor experiment
+
+### Changed
+- `engine/engine.py` — feeds per-sensor variances into the localizer (MRC); SNR display
+  now from the consistent range model
+
+### Fixed
+- `tests/test_localizer.py` — stale scenario-name assertion (name became display string in step 4)
+
+### Results
+- 25/25 tests pass
+- One sensor degraded x10: equal-weight RMSE 17 cm vs MRC 4.8 cm (11 dB gain); coverage 95%
+
+---
+
 ## [step-8] 2026-06-19 — README polish and publish
 
 ### Changed

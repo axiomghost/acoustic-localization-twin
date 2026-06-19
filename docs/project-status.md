@@ -30,6 +30,27 @@ Core algorithm: TDOA-based localization using Gauss-Newton iterative solver.
 | 7 | Full demo launch script + functional report | DONE | 2026-06-19 |
 | 8 | README polish + publish to GitHub | DONE | 2026-06-19 |
 
+### Phase 1.5 — Estimation Theory Track (learning + product, civilian)
+
+Each step ships a concept note (concepts.ipynb, taught via a channel-coding anchor),
+a code change fixing a real flaw, and a numerical experiment. Goal: build grip on the
+estimation theory *and* the artifact together.
+
+| Step | Concept | Coding anchor | Status | Date |
+|------|---------|---------------|--------|------|
+| A2 | Inverse-variance weighting (MRC) | Maximum-ratio / soft-decision combining | DONE | 2026-06-19 |
+| A1 | Fisher Information / CRLB | Matched-filter info accumulation HᵀC⁻¹H | pending | — |
+| B1 | Kalman filter (tracking) | BCJR forward recursion | pending | — |
+| B2 | EKF/UKF, non-Gaussian posterior | Gaussian approximation in density evolution | pending | — |
+| C1 | Robust estimation (NLOS/outliers) | Impulsive-noise / erasure channels | pending | — |
+| C2 | Joint clock-offset estimation | Timing / carrier recovery | pending | — |
+| D1 | GCC-PHAT measurement model | Correlation receiver / matched filter | pending | — |
+
+**A2 result:** with one sensor degraded x10, equal-weight RMSE rises to 17 cm while
+MRC holds at ~4.8 cm (11 dB array gain); 95% coverage preserved. See DEC-009, DEC-010.
+
+---
+
 **NOTE — Steps 9-11 are out of scope for this repository.** They involve impulsive
 acoustic event localization (including two-source crack+blast fusion) which is
 sensitive subject matter. These steps will be executed in a **separate private

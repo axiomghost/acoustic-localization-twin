@@ -112,6 +112,42 @@ The private repo can import the engine as a library or fork it independently.
 
 ---
 
+## DEC-009 — Range-dependent per-sensor timing noise model
+**Date:** 2026-06-19
+**Decision:** Model each sensor's arrival-time noise std as linear in source-sensor
+range: `sigma_i = ref_std * (dist_i / ref_distance)` (`timing_std_from_range`).
+**Rationale:** Received amplitude falls as 1/r, so SNR_linear ~ 1/r^2, and a matched
+filter's time-delay CRLB gives std(tau) ~ 1/sqrt(SNR_linear) ~ r. This is a
+defensible first-order model that makes sensors genuinely heterogeneous. The previous
+display-only SNR model `max(0, 40 - 20log10 d)` saturated to 0 dB beyond 100 m, which
+on a 300 m array made every sensor equal — hiding the entire point of weighting.
+**Consequence:** Localization error now depends on which sensors are close to the
+source. This is the substrate for DEC-010 (weighting) and foreshadows the GCC-PHAT
+measurement model (Phase 1.5 step D1). The exact ref_std / ref_distance are simulation
+parameters; the real hardware noise-vs-SNR curve remains an open deployment question.
+
+---
+
+## DEC-010 — Localizer: maximum-ratio (inverse-variance) weighting
+**Date:** 2026-06-19
+**Decision:** Generalize the weighted Gauss-Newton solver from equal-variance
+(`W = M^{-1}`) to the true inverse measurement covariance `W = C_r^{-1}`, where
+`C_r = c^2 (diag(var[1:]) + var[0]*ones)` is built from per-sensor variances. When
+per-sensor variances are supplied, `estimate()` returns the position covariance
+directly in m^2 (no separate sigma_r scaling — a single scalar can no longer be
+factored out once variances differ).
+**Rationale:** This is maximum-ratio combining / soft-decision weighting: each sensor
+contributes in proportion to its reliability. Equal-weight LS is equal-gain combining
+and is provably suboptimal under heterogeneous noise. Monte Carlo confirms the gain:
+with one sensor degraded x10, equal-weight RMSE rises to 17 cm while MRC holds at
+~4.8 cm (11 dB array gain); coverage stays at 95%. The equal-variance path is
+preserved (`sensor_var=None`) so prior behaviour and tests are unchanged.
+**Consequence:** The engine now feeds per-sensor variances (from DEC-009) into the
+localizer and passes `sigma_r=1.0` to `confidence_ellipse` since the covariance is
+already scaled. Documented and taught in concepts.ipynb section 8 (MRC bridge).
+
+---
+
 ## DEC-006 — Abstract interfaces: TerrainBase, PropagationModel, Localizer
 **Date:** 2026-06-18  
 **Decision:** Define Protocol/ABC for exactly three components: TerrainBase,

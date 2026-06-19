@@ -122,6 +122,11 @@ Always tell Umar which `[YOU]` tasks to do before asking Claude to continue.
 | 8 | Screencap + publish to GitHub | pending |
 | 9–11 | Impulsive event localization (crack+blast fusion) | PRIVATE REPO ONLY — do not implement here |
 
+**Phase 1.5 — Estimation Theory Track** (steps A1, A2, B1, B2, C1, C2, D1): a parallel
+learning+product track that hardens the algorithm while building Umar's grip on the
+theory. Each step = concept note (concepts.ipynb, anchored to channel coding) + code fix
++ experiment. See `docs/project-status.md` for the table. A2 (MRC weighting) is DONE.
+
 ---
 
 ## Key Files

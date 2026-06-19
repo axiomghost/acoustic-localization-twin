@@ -153,6 +153,84 @@ def test_ellipse_95pct_coverage():
     assert 0.88 <= coverage <= 0.99, f"Coverage {coverage:.2f} outside [0.88, 0.99]"
 
 
+# ── Weighted (maximum-ratio) localizer tests ──────────────────────────────────
+
+def _per_sensor_std(source_xy, ref_std_s=NOISE_STD_S):
+    """Range-dependent per-sensor timing std, matching the engine model."""
+    from engine.tdoa import timing_std_from_range
+    dists = np.linalg.norm(source_xy - SENSORS, axis=1)
+    return timing_std_from_range(dists, ref_std_s=ref_std_s)
+
+
+def test_weighted_reduces_to_equal_variance():
+    """
+    With equal per-sensor variance, the weighted path must give the same
+    position covariance as the unweighted path scaled by sigma_r^2.
+    """
+    src = np.array([100.0, 100.0])
+    rng = np.random.default_rng(11)
+    tdoa = compute_tdoa_measurements(src, SENSORS, noise_std_s=NOISE_STD_S, rng=rng)
+
+    _, raw_cov = GaussNewtonTDOA().estimate(tdoa, SENSORS)
+    scaled = raw_cov * SIGMA_R ** 2
+
+    equal_var = np.full(len(SENSORS), NOISE_STD_S ** 2)
+    _, pos_cov = GaussNewtonTDOA().estimate(tdoa, SENSORS, sensor_var=equal_var)
+
+    np.testing.assert_allclose(pos_cov, scaled, rtol=1e-6)
+
+
+def test_weighted_beats_unweighted_under_heterogeneous_noise():
+    """
+    When sensors have different noise levels, inverse-variance (MRC) weighting
+    must achieve lower mean-squared error than equal-weight LS. This is the
+    soft-decision / maximum-ratio-combining gain.
+    """
+    src = np.array([70.0, 130.0])
+    sensor_std = _per_sensor_std(src)
+    sensor_var = sensor_std ** 2
+
+    rng = np.random.default_rng(2025)
+    n = 1500
+    mse_eq = 0.0
+    mse_w = 0.0
+    loc = GaussNewtonTDOA()
+    for _ in range(n):
+        tdoa = compute_tdoa_measurements(src, SENSORS, noise_std_s=sensor_std, rng=rng)
+        est_eq, _ = loc.estimate(tdoa, SENSORS)                      # equal weight
+        est_w, _ = loc.estimate(tdoa, SENSORS, sensor_var=sensor_var)  # MRC
+        mse_eq += np.sum((est_eq - src) ** 2)
+        mse_w += np.sum((est_w - src) ** 2)
+    mse_eq /= n
+    mse_w /= n
+
+    assert mse_w < mse_eq, f"weighted MSE {mse_w:.4f} not below equal-weight {mse_eq:.4f}"
+
+
+def test_weighted_95pct_coverage():
+    """
+    Heterogeneous-noise coverage: the position covariance returned by the
+    weighted path (already in m^2) must yield ~95% ellipse coverage.
+    """
+    src = np.array([120.0, 90.0])
+    sensor_std = _per_sensor_std(src)
+    sensor_var = sensor_std ** 2
+
+    rng = np.random.default_rng(777)
+    n_trials = 400
+    inside = 0
+    loc = GaussNewtonTDOA()
+    for _ in range(n_trials):
+        tdoa = compute_tdoa_measurements(src, SENSORS, noise_std_s=sensor_std, rng=rng)
+        est, pos_cov = loc.estimate(tdoa, SENSORS, sensor_var=sensor_var)
+        err = src - est
+        maha2 = float(err @ np.linalg.solve(pos_cov, err))
+        if maha2 <= CHI2_95_2DOF:
+            inside += 1
+    coverage = inside / n_trials
+    assert 0.88 <= coverage <= 0.99, f"Coverage {coverage:.2f} outside [0.88, 0.99]"
+
+
 # ── Scenario loader integration test ──────────────────────────────────────────
 
 def test_scenario_loader_roundtrip():
@@ -161,7 +239,7 @@ def test_scenario_loader_roundtrip():
     from scenarios.loader import load_scenario
     path = Path(__file__).parent.parent / "scenarios" / "configs" / "wildlife_monitoring.yaml"
     scenario = load_scenario(path)
-    assert scenario.name == "wildlife_monitoring"
+    assert "Wildlife" in scenario.name
     assert len(scenario.sensors) == 4
     positions = scenario.sensor_positions
     assert len(positions) == 4

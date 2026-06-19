@@ -11,7 +11,7 @@ import numpy as np
 from scenarios.loader import ScenarioConfig
 from engine.source import AcousticSource
 from engine.propagation import SimplePropagation
-from engine.tdoa import compute_tdoa_measurements
+from engine.tdoa import compute_tdoa_measurements, timing_std_from_range, snr_db_from_range
 from engine.localizer import GaussNewtonTDOA
 from engine.confidence import confidence_ellipse
 from shared.state import EngineState, SensorStatus
@@ -39,27 +39,34 @@ class Engine:
         """Advance one tick. Returns the new EngineState."""
         true_xy = self.source.step(self.dt)
 
+        # Per-sensor noise from geometry: farther sensor -> weaker signal -> noisier
+        # arrival time. This is what makes inverse-variance weighting (MRC) pay off.
+        dists = np.linalg.norm(true_xy - self.sensors, axis=1)         # (N,)
+        sensor_std = timing_std_from_range(dists, ref_std_s=self.noise_std_s)  # (N,)
+        snr_db = snr_db_from_range(dists)                              # (N,)
+
         tdoa = compute_tdoa_measurements(
             true_xy, self.sensors,
             propagation=self.propagation,
-            noise_std_s=self.noise_std_s,
+            noise_std_s=sensor_std,
             rng=self.rng,
         )
-        est_xy, raw_cov = self.localizer.estimate(tdoa, self.sensors)
-        ellipse = confidence_ellipse(raw_cov, self.sigma_r)
+        # Maximum-ratio weighting: pass per-sensor variances; cov is already in m^2.
+        est_xy, pos_cov = self.localizer.estimate(
+            tdoa, self.sensors, sensor_var=sensor_std ** 2,
+        )
+        ellipse = confidence_ellipse(pos_cov, sigma_r=1.0)
         error_m = float(np.linalg.norm(est_xy - true_xy))
 
-        # Per-sensor TOA for dashboard health display
+        # Per-sensor TOA + SNR for dashboard health display
         sensor_statuses = []
         for i, spos in enumerate(self.sensors):
             toa = self.propagation.compute_toa(true_xy, spos)
-            dist = float(np.linalg.norm(true_xy - spos))
-            snr_db = max(0.0, 40.0 - 20.0 * np.log10(max(dist, 1.0)))
             sensor_statuses.append(SensorStatus(
                 id=i,
                 position=spos.tolist(),
                 toa=toa,
-                snr_db=snr_db,
+                snr_db=float(snr_db[i]),
             ))
 
         state = EngineState(
