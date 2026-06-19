@@ -5,6 +5,14 @@ Format: `[step-N] YYYY-MM-DD — Description`
 
 ---
 
+## [step-8] 2026-06-19 — README polish and publish
+
+### Changed
+- `README.md` — full rewrite: demo instructions, algorithm summary with equations,
+  architecture diagram, quick start, scenario table, links to all docs
+
+---
+
 ## [step-7] 2026-06-19 — Demo launcher and functional report
 
 ### Added
