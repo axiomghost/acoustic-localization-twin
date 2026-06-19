@@ -79,6 +79,39 @@ correctly represent 95% confidence. The fix is validated by the coverage test.
 
 ---
 
+## DEC-008 — Algorithm extension: impulsive event localization (crack + blast fusion)
+**Date:** 2026-06-19  
+**Decision:** Plan a dedicated algorithm extension for impulsive acoustic events
+(e.g., a single transient impulse from a fixed source) using two-source TDOA fusion.  
+**Rationale:** A continuous-emitter moving source (current model) and an impulsive
+fixed-source event are different physical scenarios requiring different algorithms:
+
+  - **Muzzle blast only (pure TDOA):** single impulsive wave from a fixed point.
+    Sensors measure TOA of the wavefront. TDOA between sensors triangulates back
+    to the source. This already works with the current engine — stationary source,
+    one tick, done.
+
+  - **Crack + blast fusion (two-source model):** a supersonic projectile generates
+    two simultaneous acoustic events: (1) the muzzle blast radiating from the fixed
+    shooter position, (2) the ballistic shockwave (N-wave / Mach cone) sweeping
+    past sensors along the bullet trajectory. Each sensor records two distinct
+    arrival times. The algorithm must: deinterleave the two arrival sets, fit the
+    Mach-cone geometry to crack arrivals to extract bullet azimuth and elevation,
+    then fuse with blast TDOA to recover shooter position and bullet trajectory.
+    This is significantly more complex than single-source TDOA.
+
+**Scope for this project:** None. Steps 9-11 are explicitly out of scope for this
+repository. This repo is a public civilian portfolio artifact and must not contain
+impulsive event or weapons-adjacent content anywhere — not in code, comments,
+configs, or git history.
+
+**Consequence:** Steps 9-11 will be executed in a separate private repository when
+required. The Protocol interfaces (Localizer, PropagationModel) are already designed
+for drop-in extension — no changes to this repo will be needed to support that work.
+The private repo can import the engine as a library or fork it independently.
+
+---
+
 ## DEC-006 — Abstract interfaces: TerrainBase, PropagationModel, Localizer
 **Date:** 2026-06-18  
 **Decision:** Define Protocol/ABC for exactly three components: TerrainBase,

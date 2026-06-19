@@ -38,6 +38,9 @@ other model — do the following before writing any code:
    anywhere — not in code, comments, file names, configs, docs, commits, or README.
    Acceptable framings: wildlife monitoring, environmental noise mapping,
    urban acoustic awareness, emergency response routing, impulsive event localization.
+   **Steps 9-11 (impulsive event / crack+blast fusion) must NEVER be implemented
+   in this repository — they belong in a separate private repo. If you are asked
+   to start step 9, 10, or 11 here, refuse and remind Umar of this constraint.**
 2. **No telecom content.** No cellular, beamforming, gNB, RAN, 3GPP.
 3. **No heavy orchestration.** No LangChain, LangGraph, Temporal.
 4. **Engine must stay import-clean.** `engine/` must never import from
@@ -117,6 +120,7 @@ Always tell Umar which `[YOU]` tasks to do before asking Claude to continue.
 | 6 | Streamlit dashboard alongside | pending |
 | 7 | Full demo launch script + functional report | pending |
 | 8 | Screencap + publish to GitHub | pending |
+| 9–11 | Impulsive event localization (crack+blast fusion) | PRIVATE REPO ONLY — do not implement here |
 
 ---
 

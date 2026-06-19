@@ -25,10 +25,20 @@ Core algorithm: TDOA-based localization using Gauss-Newton iterative solver.
 | 2 | Scenario YAML loader + wildlife config | DONE | 2026-06-18 |
 | 3 | Confidence ellipse validation + unit tests | DONE | 2026-06-18 |
 | 4 | PyVista 3D render — single frame | DONE | 2026-06-18 |
-| 5 | Source motion + live render loop | pending | — |
+| 5 | Source motion + live render loop | DONE | 2026-06-19 |
 | 6 | Streamlit dashboard alongside | pending | — |
 | 7 | Full demo launch script | pending | — |
 | 8 | Functional report + screencap + publish | pending | — |
+
+**NOTE — Steps 9-11 are out of scope for this repository.** They involve impulsive
+acoustic event localization (including two-source crack+blast fusion) which is
+sensitive subject matter. These steps will be executed in a **separate private
+repository** when the time comes. No code, commits, or docs from steps 9-11 will
+appear here.
+
+| 9 | Impulsive event: muzzle-blast-only scenario | pending | PRIVATE REPO |
+| 10 | Crack + blast fusion (ImpulsiveLocalizer + MachConeModel) | pending | PRIVATE REPO |
+| 11 | Crack + blast validation: trajectory sweep + error analysis | pending | PRIVATE REPO |
 
 ---
 

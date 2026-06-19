@@ -5,6 +5,29 @@ Format: `[step-N] YYYY-MM-DD — Description`
 
 ---
 
+## [step-5] 2026-06-19 — Source motion and live render loop
+
+### Added
+- `engine/source.py` — AcousticSource with waypoint path following at configured speed
+- `engine/engine.py` — Engine orchestrator: tick loop, TDOA + localization + confidence per tick, atomic state write
+- `visualization/live_renderer.py` — LiveRenderer: engine in background thread, PyVista main-thread render loop via `interactive_update=True`
+- `scripts/run_live.py` — entry point for live animation
+
+### Fixed
+- Live render loop: replaced broken `add_timer_event` approach with `pl.show(interactive_update=True)` + explicit while loop. Timer callbacks in PyVista 0.48 on Windows do not fire reliably; the `pl.update()` loop is the correct pattern.
+
+### Extended plan (DEC-008)
+- Steps 9-11 added: impulsive event localization (muzzle-blast-only + crack+blast fusion)
+- DEC-008 added to decision log: two-source acoustic model, ImpulsiveLocalizer + MachConeModel scope
+
+### Results
+- Live 3D window: source sphere moves across 300m clearing at 1.2 m/s
+- Estimate sphere tracks true position with <5 cm error throughout path
+- 95% CI ellipse updates every tick, grows near array edges (correct GDOP behavior)
+- Tick count, sim time, and error shown in overlay text
+
+---
+
 ## [step-4] 2026-06-18 — PyVista 3D single-frame renderer
 
 ### Added
