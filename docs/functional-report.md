@@ -76,22 +76,21 @@ share sensor-0's noise.
 
 ### 3.2 Noise Covariance
 
-The TDOA noise covariance matrix is:
+Per-sensor arrival-time noise grows with range (amplitude ∝ 1/r ⇒ timing CRLB ∝ r,
+DEC-009), so each sensor has its own variance σ_i². The TDOA covariance in range
+units is:
 
 ```
-C = σ_r² · M,   M = I + 1·1ᵀ
+C_r = c² · ( diag(σ_1² … σ_{N-1}²) + σ_0² · 1·1ᵀ )
 ```
 
-where σ_r = c · σ_t is the range-equivalent noise std. The inverse via
-Sherman-Morrison is:
+The off-diagonal `σ_0²·11ᵀ` term is the correlation from the shared reference sensor 0.
+The estimator weights by `W = C_r⁻¹` (maximum-ratio combining — DEC-010).
 
-```
-M⁻¹ = I - (1/N) · 1·1ᵀ
-```
-
-Using the unweighted solver (ignoring correlation) underestimates position
-covariance by ~2×, producing confidence ellipses that are too small (73% empirical
-coverage instead of 95%). The weighted solver is required for a correct CRLB.
+**Equal-variance special case:** if every σ_i = σ_t, then `C_r = σ_r²·M` with
+`M = I + 1·1ᵀ`, and `W = M⁻¹ = I − (1/N)·1·1ᵀ` (Sherman-Morrison). The unweighted
+solver (ignoring even this correlation) underestimates covariance by ~2×, giving 73%
+coverage instead of 95% — the original motivation for weighting (DEC-007).
 
 ### 3.3 Gauss-Newton Solver
 
@@ -105,7 +104,7 @@ where **J** is the (N-1) × 2 Jacobian of TDOA with respect to source position.
 Each Gauss-Newton step:
 
 ```
-Δp = (JᵀM⁻¹J)⁻¹ Jᵀ M⁻¹ (−residuals)
+Δp = (JᵀWJ)⁻¹ Jᵀ W (−residuals),   W = C_r⁻¹
 p̂ ← p̂ + Δp
 ```
 
@@ -117,7 +116,7 @@ tested geometries.
 Position covariance is estimated as the Fisher Information Matrix inverse:
 
 ```
-Σ = σ_r² · (JᵀM⁻¹J)⁻¹
+Σ = (JᵀWJ)⁻¹     (= σ_r² · (JᵀM⁻¹J)⁻¹ in the equal-variance case)
 ```
 
 The 95% confidence ellipse is the eigendecomposition of **Σ** scaled by the
@@ -135,17 +134,17 @@ geometrically correct behaviour validated by Monte Carlo.
 
 ## 4. Validation Results
 
-### 4.1 Unit Tests — 22/22 Passing
+### 4.1 Unit Tests — 25/25 Passing
 
 | Test suite | Tests | Coverage |
 |---|---|---|
 | `test_propagation.py` | 5 | TOA correctness, symmetry, Pythagorean geometry |
 | `test_tdoa.py` | 6 | Vector length, zero-noise, sign convention, noise stats, physical bounds |
-| `test_localizer.py` | 11 | Noiseless recovery, error bounds, covariance PD, GDOP, Monte Carlo coverage |
+| `test_localizer.py` | 14 | Noiseless recovery, error bounds, covariance PD, GDOP, Monte Carlo coverage, maximum-ratio weighting |
 
-### 4.2 Monte Carlo Coverage
+### 4.2 Monte Carlo Coverage (equal-variance baseline)
 
-10 000 trials, source at array centroid, σ_t = 0.1 ms:
+10 000 trials, source at array centroid, uniform σ_t = 0.1 ms:
 
 | Metric | Value |
 |---|---|
@@ -164,6 +163,21 @@ geometrically correct behaviour validated by Monte Carlo.
 | Mean error across path | < 5 cm |
 | Ellipse semi-major axis at centroid | ~5.9 cm |
 | Ellipse semi-major axis near edge | ~9 cm (correct GDOP degradation) |
+
+### 4.4 Maximum-Ratio Weighting (Phase 1.5 · A2)
+
+With heterogeneous per-sensor noise, inverse-variance (maximum-ratio) weighting
+outperforms equal-weight LS. Source at array centre, one sensor's noise degraded:
+
+| Degraded sensor noise | Equal-weight RMSE | Maximum-ratio RMSE | Gain |
+|---|---|---|---|
+| ×1 | 3.4 cm | 3.4 cm | 0 dB |
+| ×10 | 17.4 cm | 4.8 cm | 11 dB |
+| ×30 | 51.4 cm | 4.9 cm | 20 dB |
+
+Maximum-ratio weighting holds accuracy by down-weighting the degraded sensor;
+95% coverage is preserved. Derivation and "break it" experiment: `concepts.ipynb`
+section 8. See DEC-009 (noise model) and DEC-010 (weighting).
 
 ---
 

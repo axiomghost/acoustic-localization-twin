@@ -39,16 +39,20 @@ The core algorithm is a **weighted Gauss-Newton TDOA solver** with a
 1. Each sensor records the Time of Arrival (TOA) of the acoustic wavefront.
 2. TDOA is computed relative to sensor 0 — this introduces correlated noise
    (all measurements share sensor-0's noise).
-3. The correct noise covariance `C = σ²(I + 11ᵀ)` is inverted via
-   Sherman-Morrison: `M⁻¹ = I − (1/N)·11ᵀ`.
-4. Gauss-Newton iterates on the nonlinear hyperbolic system using weighted MLE:
-   `Δp = (JᵀM⁻¹J)⁻¹ Jᵀ M⁻¹ (−residuals)`
-5. Position covariance is the Fisher Information Matrix inverse:
-   `Σ = σ_r² · (JᵀM⁻¹J)⁻¹`
+3. Gauss-Newton iterates on the nonlinear hyperbolic system using weighted MLE,
+   where the weight `W` is the inverse TDOA measurement covariance:
+   `Δp = (JᵀWJ)⁻¹ Jᵀ W (−residuals)`
+4. The weighting is **maximum-ratio combining**: each sensor contributes in proportion
+   to its reliability. Per-sensor noise grows with range (`σ_τ ∝ r`), so far sensors
+   are down-weighted. The equal-variance case reduces to `W = M⁻¹ = I − (1/N)·11ᵀ`
+   (Sherman-Morrison) with `C = σ²(I + 11ᵀ)`.
+5. Position covariance is the Fisher Information Matrix inverse `Σ = (JᵀWJ)⁻¹`.
 6. The 95% confidence ellipse uses the chi-squared threshold `χ²(0.95, 2) = 5.991`.
 
-**Validated:** 22/22 unit tests pass. Monte Carlo confirms empirical 95% CI coverage.
-Mean localization error: **2.6 cm** at 0.1 ms timing noise on a 300 m sensor array.
+**Validated:** 25/25 unit tests pass; Monte Carlo confirms 95% CI coverage. Under a
+degraded sensor (×10 noise), maximum-ratio weighting holds error at ~4.8 cm where
+equal-weight LS degrades to 17 cm — an 11 dB array gain. See `docs/concepts.ipynb`
+section 8 for the derivation.
 
 ---
 

@@ -19,7 +19,7 @@ core task here.
 ## DEC-002 — IPC: Atomic JSON file over sockets/MQTT
 **Date:** 2026-06-18  
 **Decision:** Engine writes state to `shared/current_state.json` atomically each
-tick (write-to-tmp, `os.replace()`). PyVista and Streamlit read it independently.  
+tick (write-to-tmp, `os.replace()`). PyVista and the Rich panel read it independently.  
 **Rationale:** Zero broker dependencies, no threading conflicts between processes,
 ships in hours. MQTT would be cleaner architecturally but adds a broker dependency
 for a 12-day solo build. Can be upgraded later.  
