@@ -24,7 +24,7 @@ other model — do the following before writing any code:
 ## Project Identity
 
 - **Repo:** acoustic-localization-twin (local: traffic_intersection/)
-- **Author:** Umar Farooq (m.umar81@gmail.com)
+- **Author:** Umar Farooq (umar.fm981@outlook.com)
 - **Purpose:** (1) Public portfolio artifact for smart-city / environmental sensing.
   (2) Algorithm validation ahead of a real-world acoustic sensor deployment.
 - **Phase:** Phase 1 — Python + PyVista + Streamlit. Phase 2 (UE5) is future.
