@@ -15,6 +15,8 @@ awareness, emergency response routing, impulsive event localization.
 
 ## Demo
 
+![Localization digital twin — single frame render](media/demo_frame.png)
+
 Two windows run simultaneously from a single command:
 
 **3D render (PyVista)** — terrain, sensor array, moving source (green), estimated

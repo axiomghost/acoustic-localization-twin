@@ -11,6 +11,7 @@ from __future__ import annotations
 import numpy as np
 import pyvista as pv
 from dataclasses import dataclass
+from pathlib import Path
 from scenarios.loader import ScenarioConfig
 
 
@@ -88,6 +89,7 @@ def render_single_frame(
     pl = pv.Plotter(
         window_size=list(cfg.window_size),
         title=f"Acoustic Source Localization — {scenario.name}",
+        off_screen=bool(screenshot_path),
     )
     pl.set_background(cfg.background_color)
 
@@ -190,9 +192,8 @@ def render_single_frame(
     pl.add_legend(bcolor="white", border=True, size=(0.2, 0.15))
 
     if screenshot_path:
-        pl.show(auto_close=False)
-        pl.screenshot(screenshot_path)
-        pl.close()
+        Path(screenshot_path).parent.mkdir(parents=True, exist_ok=True)
+        pl.show(screenshot=screenshot_path, auto_close=True)
         print(f"Screenshot saved: {screenshot_path}")
     else:
         pl.show()

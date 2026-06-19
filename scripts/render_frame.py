@@ -27,6 +27,8 @@ SCENARIO_PATH = Path(__file__).parent.parent / "scenarios" / "configs" / "wildli
 parser = argparse.ArgumentParser()
 parser.add_argument("--screenshot", action="store_true",
                     help="Save PNG to media/ and exit instead of opening window")
+parser.add_argument("--out", default=None,
+                    help="Override output PNG path (used with --screenshot)")
 args = parser.parse_args()
 
 # ── Load scenario ─────────────────────────────────────────────────────────────
@@ -64,9 +66,13 @@ print()
 
 screenshot_path = None
 if args.screenshot:
-    media_dir = Path(__file__).parent.parent / "media"
-    media_dir.mkdir(exist_ok=True)
-    screenshot_path = str(media_dir / "step4_single_frame.png")
+    if args.out:
+        screenshot_path = args.out
+        Path(screenshot_path).parent.mkdir(parents=True, exist_ok=True)
+    else:
+        media_dir = Path(__file__).parent.parent / "media"
+        media_dir.mkdir(exist_ok=True)
+        screenshot_path = str(media_dir / "step4_single_frame.png")
 
 print("Opening PyVista window..." if not args.screenshot else "Rendering screenshot...")
 render_single_frame(
