@@ -5,6 +5,18 @@ Format: `[step-N] YYYY-MM-DD — Description`
 
 ---
 
+## [step-7] 2026-06-19 — Demo launcher and functional report
+
+### Added
+- `scripts/run_demo.py` — single-command launcher: opens Rich panel in a new
+  PowerShell window, then runs the PyVista 3D render in the current terminal
+- `docs/functional-report.md` — full functional report: objective, architecture
+  diagram, algorithm derivation (TDOA model, noise covariance, Gauss-Newton,
+  CRLB ellipse), validation results (22/22 tests, Monte Carlo coverage, path
+  tracking metrics), scenario config, open deployment questions, file index
+
+---
+
 ## [step-6] 2026-06-19 — Rich terminal panel
 
 ### Added

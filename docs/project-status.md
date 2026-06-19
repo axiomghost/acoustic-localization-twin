@@ -27,7 +27,7 @@ Core algorithm: TDOA-based localization using Gauss-Newton iterative solver.
 | 4 | PyVista 3D render — single frame | DONE | 2026-06-18 |
 | 5 | Source motion + live render loop | DONE | 2026-06-19 |
 | 6 | Rich terminal panel — live stats alongside 3D render | DONE | 2026-06-19 |
-| 7 | Full demo launch script | pending | — |
+| 7 | Full demo launch script + functional report | DONE | 2026-06-19 |
 | 8 | Functional report + screencap + publish | pending | — |
 
 **NOTE — Steps 9-11 are out of scope for this repository.** They involve impulsive
