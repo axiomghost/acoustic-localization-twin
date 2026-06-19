@@ -110,22 +110,16 @@ Always tell Umar which `[YOU]` tasks to do before asking Claude to continue.
 
 ## Step Plan
 
-| Step | Description | Status |
-|------|-------------|--------|
-| 1 | Project scaffold + TDOA algorithm smoke test | DONE |
-| 2 | Scenario YAML loader + wildlife monitoring config | pending |
-| 3 | Confidence ellipse validation + unit tests | pending |
-| 4 | PyVista 3D render — single frame | pending |
-| 5 | Source motion + live render loop | pending |
-| 6 | Rich terminal panel — live stats alongside 3D render | pending |
-| 7 | Full demo launch script + functional report | pending |
-| 8 | Screencap + publish to GitHub | pending |
-| 9–11 | Impulsive event localization (crack+blast fusion) | PRIVATE REPO ONLY — do not implement here |
+**Single source of truth: `docs/project-status.md`.** The full step table (main
+steps 1-8, Phase 1.5 estimation-theory track A1/A2/B1/B2/C1/C2/D1, and statuses) lives
+there and there only — do not duplicate it here, to avoid drift. Read it at session
+start (per the handoff protocol) to find the current step.
 
-**Phase 1.5 — Estimation Theory Track** (steps A1, A2, B1, B2, C1, C2, D1): a parallel
-learning+product track that hardens the algorithm while building Umar's grip on the
-theory. Each step = concept note (concepts.ipynb, anchored to channel coding) + code fix
-+ experiment. See `docs/project-status.md` for the table. A2 (MRC weighting) is DONE.
+Two things are fixed policy and restated here so they cannot be missed:
+- **Steps 9-11** (impulsive event / crack+blast fusion) are **PRIVATE REPO ONLY** —
+  never implement them here (see Hard Constraints above).
+- **Phase 1.5** is a parallel learning+product track: each step = concept note
+  (`concepts.ipynb`, anchored to channel coding) + code fix + experiment.
 
 ---
 
